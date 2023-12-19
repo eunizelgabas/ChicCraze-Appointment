@@ -32,8 +32,8 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
                     <div class="flex flex-row items-center h-6">
                         <div class="text-m font-light tracking-wide text-white" v-show="!collapse">
                             <p class="font-semibold tracking-wide text-m text-white leading-tight">
-                                <span v-if="$page.props.auth.user.type  === 'Admin'">Administrator</span>
-                                <span v-else-if="$page.props.auth.user.type === 'Doctor'">Standard User</span>
+                                <span v-if="$page.props.auth.user.type  === 'Admin'">ADMINISTRATOR</span>
+                                <span v-else-if="$page.props.auth.user.type === 'Standard'">CLIENT</span>
 
                             </p>
                         </div>

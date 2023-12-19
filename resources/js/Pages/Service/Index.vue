@@ -322,7 +322,7 @@ setTimeout(() => {
                                 <p class="block font-sans text-base font-light leading-relaxed  antialiased">
                                   {{ serv.description }}
                                 </p>
-                                <div class="group mt-8 flex flex-wrap items-center justify-center gap-3">
+                                <div class="group mt-8 flex flex-wrap items-center justify-center gap-3" v-if="isAdmin">
 
                                 <a href="#"  @click="edit(serv)" title="Edit Service"
                                     data-tooltip-target="wifi"

@@ -11,56 +11,36 @@ use Illuminate\Support\Facades\Request as HttpRequest;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $isAdmin =  $user->hasAnyRole(['Admin']);
 
+        // $query = Appointment::with('user', 'service')
+        // ->orderBy('id', 'desc');
+        // if ($request->filled('from_date') && $request->filled('to_date')) {
+        //     $query->whereBetween('requestDate', [$request->from_date, $request->to_date]);
+        // }
+        // $appointments = $query->paginate(6);
         if ($user->hasRole('Admin')) {
-            // $appointments = Appointment::with([
-            //     'doctor', 'doctor.user', 'patient', 'service'
-            //     ])->orderBy('created_at','desc')
-            //     ->paginate(8)
-            //     ->withQueryString();
-                $appointments = Appointment::query()->with([
-                   'user' , 'service'
-                    ])->orderBy('created_at','desc')->when(HttpRequest::input('search'), function($query, $search){
-                        $query->whereHas('user', function($userQuery) use ($search){
-                            $userQuery->where('name',  'like' , '%' . $search . '%');
-                        })->orWhereHas('service', function ($serviceQuery) use ($search) {
-                            $serviceQuery->where('name', 'like', '%' . $search . '%');
-                        });
-                    })
-                    ->paginate(8)
-                    ->withQueryString();
-
-            $acceptedApp = Appointment::with(['user', 'service'])
-            ->where('status', '=', 'Accepted')
-            ->orderBy('created_at', request('sort', 'desc'))
-            ->when(HttpRequest::input('search'), function($query, $search){
-                $query->whereHas('user', function($userQuery) use ($search){
-                    $userQuery->where('name',  'like' , '%' . $search . '%');
-                })->orWhereHas('service', function ($serviceQuery) use ($search) {
-                    $serviceQuery->where('name', 'like', '%' . $search . '%');
+            $appointments = Appointment::query()
+                ->with(['user', 'service'])
+                ->orderBy('created_at', 'desc')
+                ->when(HttpRequest::input('search'), function ($query, $search) {
+                    $query->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%' . $search . '%');
+                    })->orWhereHas('service', function ($serviceQuery) use ($search) {
+                        $serviceQuery->where('name', 'like', '%' . $search . '%');
+                    });
                 });
-            })
-            ->paginate(8)
-            ->withQueryString();
 
-            $cancelApp = Appointment::with(['user','service'])
-            ->where('status', '=', 'Cancelled')
-            ->orderBy('created_at', request('sort', 'desc'))
-            ->when(HttpRequest::input('search'), function($query, $search){
-                $query->whereHas('user', function($userQuery) use ($search){
-                    $userQuery->where('name',  'like' , '%' . $search . '%');
-                })->orWhereHas('service', function ($serviceQuery) use ($search) {
-                    $serviceQuery->where('name', 'like', '%' . $search . '%');
-                });
-            })
-            ->paginate(8)
-            ->withQueryString();
+            if (HttpRequest::filled('from_date') && HttpRequest::filled('to_date')) {
+                $appointments->whereBetween('date', [HttpRequest::input('from_date'), HttpRequest::input('to_date')]);
+            }
 
-        } elseif ($user->hasRole('Standard')) {
+            $appointments = $appointments->paginate(8)->withQueryString();
+        }
+         elseif ($user->hasRole('Standard')) {
             $appointments = Appointment::with(['user', 'service'])
                 ->whereHas('user', function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -71,38 +51,13 @@ class AppointmentController extends Controller
                     })->orWhereHas('service', function ($serviceQuery) use ($search) {
                         $serviceQuery->where('name', 'like', '%' . $search . '%');
                     });
-                })->paginate(8)
-                ->withQueryString();
+                });
+                if (HttpRequest::filled('from_date') && HttpRequest::filled('to_date')) {
+                    $appointments->whereBetween('date', [HttpRequest::input('from_date'), HttpRequest::input('to_date')]);
+                }
 
-                $acceptedApp = Appointment::with(['user', 'service'])
-                ->where('status', '=', 'Accepted')
-                ->whereHas('user', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                }) ->orderBy('created_at', request('sort', 'desc'))
-                ->when(HttpRequest::input('search'), function($query, $search){
-                    $query->whereHas('user', function($userQuery) use ($search){
-                        $userQuery->where('name',  'like' , '%' . $search . '%');
-                    })->orWhereHas('service', function ($serviceQuery) use ($search) {
-                        $serviceQuery->where('name', 'like', '%' . $search . '%');
-                    });
-                })
-                ->paginate(8)
-                ->withQueryString();
+                $appointments = $appointments->paginate(8)->withQueryString();
 
-                $cancelApp = Appointment::with(['user', 'service'])
-                ->where('status', '=', 'Cancelled')
-                ->whereHas('user', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                }) ->orderBy('created_at', request('sort', 'desc'))
-                ->when(HttpRequest::input('search'), function($query, $search){
-                    $query->whereHas('user', function($userQuery) use ($search){
-                        $userQuery->where('name',  'like' , '%' . $search . '%');
-                    })->orWhereHas('service', function ($serviceQuery) use ($search) {
-                        $serviceQuery->where('name', 'like', '%' . $search . '%');
-                    });
-                })
-                ->paginate(8)
-                ->withQueryString();
         }  else {
             // Handle other roles or unauthorized access as needed
             return abort(403);
@@ -111,9 +66,7 @@ class AppointmentController extends Controller
 
         return inertia('Appointment/Index', [
             'appointments' => $appointments,
-            'cancelApp' => $cancelApp,
-            'acceptedApp' => $acceptedApp,
-            'sort' => request('sort', 'desc'),
+
             'filters' => HttpRequest::only(['search']),
             'isAdmin' => $isAdmin
         ]);
