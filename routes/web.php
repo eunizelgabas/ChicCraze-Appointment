@@ -46,9 +46,10 @@ Route::middleware('auth')->group(function () {
         });
 
      //Services
+     Route::get('/service',[ServiceController::class, 'index'])->name('service.index');
      Route::middleware('can:manage-service')->group(function() {
         Route::get('/service/create', [ServiceController::class, 'create'])->name('service.create');
-        Route::get('/service',[ServiceController::class, 'index'])->name('service.index');
+
         Route::post('/service',[ServiceController::class, 'store']);
         Route::get('/service/edit/{service}', [ServiceController::class, 'edit']);
         Route::put('/service/{service}',[ServiceController::class, 'update']);
@@ -59,13 +60,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/appointment/index', [AppointmentController::class,  'index'])->name('appointment.index');
         Route::get('/appointment/create', [AppointmentController::class,  'create'])->name('appointment.create');
         Route::post('/appointment', [AppointmentController::class,  'store']);
-        Route::get('/appointment/show/{appointment}', [AppointmentController::class, 'show']);
-        Route::get('/appointment/edit/{appointment}', [AppointmentController::class, 'edit']);
-        Route::delete('/appointment/{appointment}', [AppointmentController::class, 'destroy']);
-        Route::put('/appointment/{appointment}',[AppointmentController::class, 'update']);
         Route::post('/appointment/accept/{appointment}', [AppointmentController::class, 'accept']);
         Route::post('/appointment/cancel/{appointment}', [AppointmentController::class, 'cancel']);
-        Route::get('/appointment/create/{patient}', [AppointmentController::class, 'createForPatient']);
+        Route::get('/appointment/create/{service}', [AppointmentController::class, 'withservice']);
+        Route::post('/appointments', [AppointmentController::class, 'storeService']);
     });
 });
 

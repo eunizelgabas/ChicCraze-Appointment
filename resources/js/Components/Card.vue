@@ -1,5 +1,5 @@
 <template>
-    <div class="p-8 rounded-lg bg-white shadow-lg">
+    <div class="p-8 rounded-lgshadow-lg">
 
             <slot name="head">
 

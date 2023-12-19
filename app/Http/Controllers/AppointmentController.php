@@ -14,6 +14,7 @@ class AppointmentController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $isAdmin =  $user->hasAnyRole(['Admin']);
 
         if ($user->hasRole('Admin')) {
             // $appointments = Appointment::with([
@@ -114,6 +115,7 @@ class AppointmentController extends Controller
             'acceptedApp' => $acceptedApp,
             'sort' => request('sort', 'desc'),
             'filters' => HttpRequest::only(['search']),
+            'isAdmin' => $isAdmin
         ]);
     }
 
@@ -130,6 +132,7 @@ class AppointmentController extends Controller
             'isAdmin' => $isAdmin,
             'isStandard'=> $isStandard,
             'users' => $users,
+            'user'=> $user
         ]);
     }
 
@@ -167,4 +170,89 @@ class AppointmentController extends Controller
 
         return response()->json($appointments);
     }
+
+    public function accept(Appointment $appointment){
+        $appointment->update(['status' => 'Accepted']);
+
+        $user = $appointment->user;
+
+
+
+        // $log_entry = Auth::user()->firstname . " ". Auth::user()->lastname . " accepted an appointment with ". $appointment->patient->firstname. " " . $appointment->patient->lastname. " with the id# ". $appointment->id;
+        // event(new UserLog($log_entry));
+
+        return redirect()->route('appointment.index')->with('success', 'Appointment approved successfully.');
+    }
+
+    public function cancel(Appointment $appointment){
+        // Update the appointment status to 'canceled'
+        $appointment->update(['status' => 'Cancelled']);
+
+        $user = $appointment->user;
+
+
+
+        // $log_entry = Auth::user()->firstname . " ". Auth::user()->lastname . " cancelled an appointment with ". $appointment->patient->firstname. " " . $appointment->patient->lastname. " with the id# ". $appointment->id;
+        // event(new UserLog($log_entry));
+
+        return redirect()->route('appointment.index')->with('success', 'Appointment canceled successfully.');
+    }
+
+    public function withservice(Service $service = null){
+        $user = Auth::user();
+
+        $isAdmin =  $user->hasAnyRole(['Admin']);
+        $isStandard =  $user->hasRole('Standard');
+        $users = User::where('type', 'Standard')->get();
+
+        if ($service) {
+            $services = [$service];
+        } else {
+            $services = Service::all();
+        }
+
+        return inertia('Appointment/Create2', [
+            'service' => $services,
+            'isAdmin' => $isAdmin,
+            'isStandard'=> $isStandard,
+            'users' => $users,
+            'user'=> $user
+        ]);
+    }
+
+    public function storeService(Request $request){
+        $user = Auth::user();
+
+        $fields = $request->validate([
+
+            'date' => 'required|date|after_or_equal:today',
+            'time' => 'required',
+            'reason' => 'required',
+        ]);
+
+        if ($user->hasRole('Standard')) {
+            $fields['user_id'] = $user->id;
+        } elseif ($user->hasRole('Admin')) {
+
+            $fields['user_id'] = $request->input('user_id');
+            $fields['status'] = "Accepted";
+        }
+
+
+        if ($request->has('service_id')) {
+            $fields['service_id'] = $request->input('service_id');
+            $service = Service::find($fields['service_id']);
+            $successMessage = 'Service booked successfully.';
+        } else {
+            // No need to fetch services again, as it was done in the withservice method
+            $successMessage = 'All Services retrieved successfully.';
+        }
+
+
+       $appointment =  Appointment::create($fields);
+
+
+        return redirect()->route('appointment.index')->with('success', 'Appointment created successfully.');
+    }
 }
+

@@ -6,11 +6,8 @@
     import { useForm } from '@inertiajs/vue3';
 
 
-
-
-
     let props = defineProps({
-        services: Object,
+        service: Array,
         appointment: Object,
         users:Object,
         isAdmin:Boolean,
@@ -23,11 +20,15 @@ let form = useForm({
        'time' : '',
        'user_id': '',
        'reason': '',
-       'service_id': '',
+        'service_id': props.service ? props.service[0]?.id : null,
        'name': props.isStandard ? props.user.name : '',
 
 })
 
+ onMounted(() => {
+   console.log('Selected Service:', props.service);
+   console.log('Service ID:', props.service ? props.service[0]?.id : null);
+  });
 
 
 const submit = () =>{
@@ -95,10 +96,15 @@ const submit = () =>{
                                 </div>
                                 <div class="col-span-6 sm:col-span-2">
                                     <label for="service_id" class="text-sm font-medium text-gray-900 block mb-2">Service</label>
-                                    <select v-model="form.service_id" class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-indigo-600 focus:border-indigo-600 block w-full p-2.5">
-                                        <option selected disabled >Select services</option>
-                                        <option v-for="service in services" :key="service.id" :value="service.id">{{ service.name }}</option>
-                                    </select>
+                                     <input
+                                        type="text"
+                                        name="service_id"
+                                        id="service_id"
+                                        :value="props.service ? props.service[0]?.name : ''"
+                                        readonly
+                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-indigo-600 focus:border-indigo-600 block w-full p-2.5"
+                                        required
+                                    />
                                     <div class="text-sm text-red-500 italic" v-if="form.errors.service_id">{{ form.errors.service_id }}</div>
                                 </div>
                                 <div class="col-span-full">

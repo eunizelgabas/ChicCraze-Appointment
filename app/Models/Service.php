@@ -9,7 +9,7 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = ['name' , 'description' ,'image'];
 
     public function appointment(){
         return $this->belongsTo(Appointment::class);

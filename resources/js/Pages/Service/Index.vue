@@ -8,6 +8,8 @@ import Card from '@/Components/Card.vue'
 import { ref, watch, onMounted, computed } from 'vue';
 import { useForm, Link, Head,router } from '@inertiajs/vue3'
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+ import { inject } from 'vue';
+const toggleDarkMode = inject('isDarkMode');
 
 let showConfirm = ref(false)
 let showEdit = ref(false)
@@ -170,10 +172,10 @@ setTimeout(() => {
                 {{ $page.props.flash.error }}
                 <div class="progress-bar error"></div>
             </div>
-            <div class="sm:flex sm:items-center sm:justify-between">
+            <div class="sm:flex sm:items-center sm:justify-between" :class="themeMode">
                 <div>
                     <div class="flex items-center gap-x-3">
-                        <h2 class="text-3xl font-bold text-black">ChicCraze Service</h2>
+                        <h2 class="text-3xl font-bold ">ChicCraze Service</h2>
 
                         <span class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">{{ serviceCount }} service</span>
                     </div>
@@ -194,10 +196,10 @@ setTimeout(() => {
                     </div>
                 </div>
 
-                <div class="relative flex items-center  md:mt-0">
+                <div class="relative flex items-center  md:mt-0" >
 
                     <div class="flex items-center  gap-x-3">
-                        <button @click="add()" class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
+                        <button @click="add()" v-if="$page.props.auth.permissions.includes('manage-service')" class="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg shrink-0 sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
                             <i class="fa-solid fa-plus"></i>
                             <span class="">Add Medical Service</span>
                         </button>
@@ -260,116 +262,9 @@ setTimeout(() => {
                 </div>
             </div>
 
-            <div class="w-full px-2 mt-3">
+            <div class="w-full px-2 mt-3" :class="themeMode">
                 <div class="h-12">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                        <!-- <table class="min-w-max w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
-                                    <th class="py-3 px-6 text-center">ID</th>
-                                    <th class="py-3 px-6 text-center">Name</th>
-                                    <th class="py-3 px-6 text-center">Description</th>
-                                    <th class="py-3 px-6 text-center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 text-sm font-light" >
-
-                                <tr  class="border-b border-gray-200 hover:bg-gray-100" v-for="serv in services.data" :key="serv.id">
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <p class="font-medium">{{ serv.id }}</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <p class="font-medium">{{ serv.name }}</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex items-center justify-center">
-                                            <p class="font-medium">{{ serv.description }}</p>
-                                        </div>
-                                    </td>
-                                    <td class="py-3 px-6 text-center">
-                                        <div class="flex item-center justify-center">
-                                            <div class="flex item-center justify-center">
-                                                <div class="w-4 mr-2 transform hover:text-purple-500 hover:scale-110">
-                                                    <a href="#" @click="edit(serv)" class="btn" title="Edit Category">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                        </svg>
-                                                    </a>
-                                                    <Modal :show="showEdit" @close="close">
-                                                        <div class="p-4 sm:p-10 overflow-y-auto">
-                                                            <div class="flex items-center justify-center ">
-                                                                <div class="mx-auto w-full max-w-[550px] bg-white">
-                                                                    <form @submit.prevent = "update">
-                                                                        <div class="mb-5 pt-3">
-                                                                            <label class="mb-5 block text-base font-semibold text-[#07074D] sm:text-xl">
-                                                                            Edit  Medical Service Details
-                                                                            </label>
-                                                                            <div class="-mx-3 flex flex-wrap">
-                                                                                <div class="w-full px-3">
-                                                                                    <div class="mb-5">
-                                                                                        <label for="name" class="text-left">Name</label>
-                                                                                        <input type="text" v-model="form.name" name="name" id="name" placeholder=""
-                                                                                            class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                                                                    </div>
-                                                                                    <div class="mb-5">
-                                                                                        <label for="description" class="text-left">Description</label>
-                                                                                        <input type="text" v-model="form.description" name="description" id="description" placeholder=""
-                                                                                            class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="mt-6 flex justify-end gap-x-4">
-                                                                            <SecondaryButton @click="close">Cancel</SecondaryButton>
-                                                                            <PrimaryButton type="submit" @click="update">Save</PrimaryButton>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </Modal>
-                                                </div>
-                                            </div>
-                                            <div class="w-4  ml-2 mr-2 transform hover:text-red-500 hover:scale-110">
-                                                <a href="#" @click="remove(serv)" class="btn" title="Delete Category">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </a>
-                                                <Modal :show="showConfirm" @close="closeModal">
-                                                    <div class="p-4 sm:p-10 text-center overflow-y-auto">
-
-                                                        <span class="mb-4 inline-flex justify-center items-center w-[62px] h-[62px] rounded-full border-4 border-red-50 bg-red-100 text-red-500">
-                                                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"></path>
-                                                            </svg>
-                                                        </span>
-
-
-                                                        <h3 class="mb-2 text-2xl font-bold text-gray-800">
-                                                            Delete Medical Service
-                                                        </h3>
-                                                        <p class="text-gray-500">
-                                                            Are you sure you want like to delete this Medical Service?
-                                                        </p>
-
-                                                        <div class="mt-6 flex justify-center gap-x-4">
-                                                            <SecondaryButton @click="closeModal">Cancel</SecondaryButton>
-                                                            <DangerButton @click="deleteServ()">Delete</DangerButton>
-                                                        </div>
-                                                    </div>
-                                                </Modal>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table> -->
-
+                    <div class=" overflow-hidden shadow-sm sm:rounded-lg">
                             <Card>
 
                             <template #head>
@@ -404,10 +299,10 @@ setTimeout(() => {
                                 </div>
 
                                 <div class="mb-3 flex items-center justify-between mt-5">
-                                <h5 class="block font-sans text-xl font-medium leading-snug tracking-normal text-blue-gray-900 antialiased">
+                                <h5 class="block font-sans text-xl font-medium leading-snug tracking-normal  antialiased">
                                     {{ serv.name }}
                                 </h5>
-                                <p class="flex items-center gap-1.5 font-sans text-base font-normal leading-relaxed text-blue-gray-900 antialiased">
+                                <p class="flex items-center gap-1.5 font-sans text-base font-normal leading-relaxed  antialiased">
                                     <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24"
@@ -424,7 +319,7 @@ setTimeout(() => {
                                     5.0
                                 </p>
                                 </div>
-                                <p class="block font-sans text-base font-light leading-relaxed text-gray-700 antialiased">
+                                <p class="block font-sans text-base font-light leading-relaxed  antialiased">
                                   {{ serv.description }}
                                 </p>
                                 <div class="group mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -531,13 +426,13 @@ setTimeout(() => {
                                 </div>
                             </div>
                             <div class="p-6 pt-3">
-                                <button
+                                <Link :href="('/appointment/create/' + serv.id)"
                                 class="block w-full select-none rounded-lg bg-[#8C5454] py-3.5 px-7 text-center align-middle font-sans text-sm font-bold uppercase text-white shadow-md shadow-[#FFD6A7] transition-all hover:shadow-lg hover:shadow-[#F7CEA1] focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 type="button"
                                 data-ripple-light="true"
                                 >
                                 Book Appointment
-                                </button>
+                                </Link>
                             </div>
                             </div>
                             </div>

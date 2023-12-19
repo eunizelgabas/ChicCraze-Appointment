@@ -8,7 +8,8 @@ import Modal from '@/Components/Modal.vue';
 import { ref, computed } from 'vue';
 import { watch } from 'vue';
 import { onMounted } from 'vue';
-
+ import { inject } from 'vue';
+const toggleDarkMode = inject('isDarkMode');
 
 let props = defineProps({
         users:Array,
@@ -83,8 +84,8 @@ setTimeout(() => {
             </div>
             <div class="sm:flex sm:items-center sm:justify-between">
                 <div>
-                    <div class="flex items-center gap-x-3">
-                        <h2 class="text-3xl font-bold text-black">List of Users</h2>
+                    <div class="flex items-center gap-x-3" :class="themeMode">
+                        <h2 class="text-3xl font-bold ">List of Users</h2>
 
                         <span class="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">{{ activeUserCount }} users</span>
                     </div>
@@ -118,9 +119,9 @@ setTimeout(() => {
                 </div>
             </div>
 
-            <div class="w-full px-2">
+            <div class="w-full px-2" :class="themeMode">
                 <div class="h-12">
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="overflow-hidden shadow-sm sm:rounded-lg">
                         <table class="min-w-max w-full table-auto">
                             <thead>
                                 <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
@@ -132,7 +133,7 @@ setTimeout(() => {
                                     <th class="py-3 px-6 text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-gray-600 text-sm font-light" >
+                            <tbody class=" text-sm font-light" >
                                 <tr  class="border-b border-gray-200 hover:bg-gray-100" v-for="user in users.data" :key="user.id">
                                     <td class="py-3 px-6 text-center">
                                         <div class="flex items-center justify-center">
